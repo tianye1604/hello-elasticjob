@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
+       xmlns:job="http://www.dangdang.com/schema/ddframe/job"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.dangdang.com/schema/ddframe/reg
+                        http://www.dangdang.com/schema/ddframe/reg/reg.xsd
+                        http://www.dangdang.com/schema/ddframe/job
+                        http://www.dangdang.com/schema/ddframe/job/job.xsd
+                        ">
+    <!--配置作业注册中心 -->
+    <reg:zookeeper id="regCenter"
+                   server-lists="localhost:2181"
+                   namespace="dd-job"
+                   base-sleep-time-milliseconds="1000"
+                   max-sleep-time-milliseconds="3000"
+                   max-retries="3" />
+
+
+    <!-- 声明线程池 -->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"
+          p:corePoolSize="10" p:maxPoolSize="50"
+          p:queueCapacity="20000" p:keepAliveSeconds="60" />
+
+    <bean id="simpleJob" class="com.tianye.helloejob.job.SimpleDemoJob"/>
+    <!-- 配置作业-->
+    <job:simple id="demoSimpleSpringJob"
+                job-ref="simpleJob"
+                registry-center-ref="regCenter"
+                cron="0/30 * * * * ?"
+                sharding-total-count="5"
+                job-sharding-strategy-class="com.dangdang.ddframe.job.lite.api.strategy.impl.AverageAllocationJobShardingStrategy"
+                description="定时任务分片测试"
+                overwrite="true"
+                failover="true"
+                executor-service-handler="com.tianye.helloejob.handler.MyExecutorServiceHandler">
+        <!--<job:listener  class="com.tianye.helloejob.listener.MyElasticJobListener"/>-->
+        <job:distributed-listener class="com.tianye.helloejob.listener.MyDistributeOnceElasticJobListener"
+                                  started-timeout-milliseconds="1000"
+                                  completed-timeout-milliseconds="1000"/>
+    </job:simple>
+
+
+</beans>
