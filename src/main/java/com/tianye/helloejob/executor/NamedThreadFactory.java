@@ -8,20 +8,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Create Date: 2019/12/9 20:11
  * Description: ${DESCRIPTION}
  */
-public class MyThreadFactory implements ThreadFactory {
+public class NamedThreadFactory implements ThreadFactory {
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
-    MyThreadFactory(String name) {
+    NamedThreadFactory(ThreadPoolEnum threadPoolEnum) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
                 Thread.currentThread().getThreadGroup();
-        namePrefix = name + "-pool-" +
-                poolNumber.getAndIncrement() +
-                "-thread-";
+        namePrefix = threadPoolEnum.getDesc()
+                + "-pool-"
+                + poolNumber.getAndIncrement()
+                + "-";
     }
 
     public Thread newThread(Runnable r) {

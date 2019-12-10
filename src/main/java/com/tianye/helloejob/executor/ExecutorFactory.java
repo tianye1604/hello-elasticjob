@@ -32,7 +32,7 @@ public class ExecutorFactory {
                 keepAliveMilSec,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(queueSize),
-                new MyThreadFactory(threadPoolEnum.getDesc()),
+                new NamedThreadFactory(threadPoolEnum),
                 new ThreadPoolExecutor.CallerRunsPolicy()
         );
     }
